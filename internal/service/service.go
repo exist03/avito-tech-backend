@@ -7,7 +7,7 @@ import (
 )
 
 type Repository interface {
-	Get(ctx context.Context, userId int) ([]string, error)
+	Get(ctx context.Context, userId int) ([]internal.Segment, error)
 	Create(ctx context.Context, segment internal.Segment) error
 	Delete(ctx context.Context, segmentId int) error
 }
@@ -24,8 +24,7 @@ func (s *Service) Get(userId int) ([]byte, error) {
 	if err != nil {
 		//TODO
 	}
-	res := internal.SegmentList{Segments: list}
-	response, _ := json.Marshal(res)
+	response, _ := json.Marshal(list)
 	return response, err
 }
 

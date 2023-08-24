@@ -44,9 +44,9 @@ func (r *PsqlRepo) Delete(ctx context.Context, segmentId int) error {
 	return nil
 }
 
-func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]string, error) {
-	res := make([]string, 0)
-	rows, err := r.pool.Query(ctx, "SELECT segment.name from segment join accordance on segment.id = accordance.segment_id where accordance.user_id=$1", userId)
+func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]internal.Segment, error) {
+	res := make([]internal.Segment, 0)
+	rows, err := r.pool.Query(ctx, "SELECT segment.id, segment.name from segment join accordance on segment.id = accordance.segment_id where accordance.user_id=$1", userId)
 	defer rows.Close()
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -55,11 +55,13 @@ func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]string, error) {
 		return nil, err
 	}
 	for rows.Next() {
-		var segment string
-		err := rows.Scan(&segment)
+		var segmentId int
+		var segmentName string
+		err := rows.Scan(&segmentId, &segmentName)
 		if err != nil {
 			return nil, err
 		}
+		segment := internal.Segment{Id: segmentId, Name: segmentName}
 		res = append(res, segment)
 	}
 	if err := rows.Err(); err != nil {
@@ -67,3 +69,7 @@ func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]string, error) {
 	}
 	return res, nil
 }
+
+//func (r *PsqlRepo) Update(ctx context.Context) error {
+//
+//}

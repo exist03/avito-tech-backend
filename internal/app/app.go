@@ -32,12 +32,12 @@ func New(ctx context.Context, cfg *config.Config) *App {
 	a.handlers = handlers.New(a.service)
 	a.router = fiber.New()
 	/*
-		Метод добавления пользователя в сегмент. Принимает список (названий) сегментов которые нужно
-		добавить пользователю, список (названий) сегментов которые нужно удалить у пользователя, id пользователя.
+		Метод добавления пользователя в сегмент. Принимает список сегментов которые нужно
+		добавить пользователю, список сегментов которые нужно удалить у пользователя, id пользователя.
 	*/
 	a.router.Get("/api/service/get/:user_id", a.handlers.Get)
 	a.router.Post("/api/service/segment/", a.handlers.Create)
-	a.router.Post("/api/service/update/", a.handlers.Update)
+	a.router.Patch("/api/service/update/", a.handlers.Update)
 	a.router.Delete("/api/service/segment/:id", a.handlers.Delete)
 	return a
 }

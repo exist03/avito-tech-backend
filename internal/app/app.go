@@ -43,6 +43,7 @@ func New(ctx context.Context, cfg *config.Config) *App {
 }
 
 func Run(a *App) {
+	go a.repository.Checker()
 	//Graceful	Shutdown
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)

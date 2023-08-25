@@ -10,6 +10,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
+	"log"
+	"time"
 )
 
 type PsqlRepo struct {
@@ -70,6 +72,40 @@ func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]internal.Segment, err
 	return res, nil
 }
 
-//func (r *PsqlRepo) Update(ctx context.Context) error {
-//
-//}
+func (r *PsqlRepo) Update(ctx context.Context, req internal.UpdateRequest) error {
+	for _, v := range req.SegmentsAdd {
+		r.connectSegment(ctx, req.UserId, v.Id, v.TTL)
+	}
+	for _, v := range req.SegmentsDel {
+		r.disconnectSegment(ctx, req.UserId, v.Id)
+	}
+	return nil
+}
+
+func (r *PsqlRepo) connectSegment(ctx context.Context, userId, segmentId int, ttl time.Time) error {
+	_, err := r.pool.Exec(ctx, "INSERT INTO accordance VALUES ($1, $2, $3)", userId, segmentId, ttl.Unix())
+	if err != nil {
+		r.logger.Info().Err(err).Msg("connect error")
+		return err
+	}
+	return nil
+}
+func (r *PsqlRepo) disconnectSegment(ctx context.Context, userId, segmentId int) error {
+	_, err := r.pool.Exec(ctx, "DELETE FROM accordance WHERE user_id=$1 AND segment_id=$2", userId, segmentId)
+	if err != nil {
+		r.logger.Info().Err(err).Msg("disconnect error")
+		return err
+	}
+	return nil
+}
+
+func (r *PsqlRepo) Checker() {
+	for {
+		log.Println(time.Now().Unix())
+		time.Sleep(45 * time.Second)
+		_, err := r.pool.Exec(context.Background(), "DELETE FROM accordance WHERE expires<$1", time.Now().Unix())
+		if err != nil {
+			r.logger.Info().Err(err).Msg("checker error")
+		}
+	}
+}

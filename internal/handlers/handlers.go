@@ -12,6 +12,7 @@ type Service interface {
 	Get(userId int) ([]byte, error)
 	Create(segment internal.Segment) error
 	Delete(segmentId int) error
+	Update(req internal.UpdateRequest) error
 }
 
 type Handlers struct {
@@ -47,6 +48,12 @@ func (h *Handlers) Create(ctx *fiber.Ctx) error {
 }
 
 func (h *Handlers) Update(ctx *fiber.Ctx) error {
+	var req internal.UpdateRequest
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.SendStatus(http.StatusBadRequest)
+	}
+	h.service.Update(req)
 	return nil
 }
 

@@ -21,8 +21,18 @@ const (
 type App struct {
 	handlers   *handlers.Handlers
 	service    *service.Service
-	repository *repository.PsqlRepo
+	repository *repository.PsqlRepo // mb inject interface
 	router     *fiber.App
+}
+
+func myMiddleware(handler func(c *fiber.Ctx) ([]byte, error), ctx *fiber.Ctx) fiber.Handler {
+	log.Println("begin")
+	data, _ := handler(ctx)
+	return func(ctx *fiber.Ctx) error {
+		ctx.Send(data)
+		return nil
+	}
+	//log.Println("end")
 }
 
 func New(ctx context.Context, cfg *config.Config) *App {
@@ -31,11 +41,15 @@ func New(ctx context.Context, cfg *config.Config) *App {
 	a.service = service.New(a.repository)
 	a.handlers = handlers.New(a.service)
 	a.router = fiber.New()
-	/*
-		Метод добавления пользователя в сегмент. Принимает список сегментов которые нужно
-		добавить пользователю, список сегментов которые нужно удалить у пользователя, id пользователя.
-	*/
+
+	//hl := handlers.NewHL(a.handlers, logger.GetLogger())
+	//a.router.Use(logger.New())
+
+	//a.router.Get("/", a.GetUserIDLogger)
+
+	//a.router.Get("/api/service/get/:user_id", hl.GetL)
 	a.router.Get("/api/service/get/:user_id", a.handlers.Get)
+	a.router.Get("/api/service/get_history/", a.handlers.GetHistory)
 	a.router.Post("/api/service/segment/", a.handlers.Create)
 	a.router.Patch("/api/service/update/", a.handlers.Update)
 	a.router.Delete("/api/service/segment/:id", a.handlers.Delete)
@@ -43,6 +57,7 @@ func New(ctx context.Context, cfg *config.Config) *App {
 }
 
 func Run(a *App) {
+	//auto remove segments
 	go a.repository.Checker()
 	//Graceful	Shutdown
 	sig := make(chan os.Signal, 1)

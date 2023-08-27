@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
+	"log"
 	"os"
 	"time"
 )
@@ -42,6 +43,7 @@ func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]internal.Segment, err
 	defer rows.Close()
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
+			log.Println("qwe")
 			return nil, domain.ErrNoContent
 		}
 		return nil, err

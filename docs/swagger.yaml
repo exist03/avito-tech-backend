@@ -1,0 +1,106 @@
+definitions:
+  internal.Segment:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      ttl:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is an auto-generated API Docs.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: API
+  version: "1.0"
+paths:
+  /api/service/segment:
+    post:
+      consumes:
+      - application/json
+      description: Create a new segment.
+      parameters:
+      - description: admin
+        in: header
+        name: User-role
+        required: true
+        type: string
+      - description: Segment attributes
+        in: body
+        name: segment_attrs
+        required: true
+        schema:
+          $ref: '#/definitions/internal.Segment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+      summary: create a new segment
+      tags:
+      - Segment
+  /api/service/segment/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a segment.
+      parameters:
+      - description: Segment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: admin
+        in: header
+        name: User-role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+      summary: delete a new segment
+      tags:
+      - Segment
+  /api/service/user/get/{user_id}:
+    get:
+      description: Get list of user`s segments.
+      parameters:
+      - description: Segment ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+      summary: Get list
+      tags:
+      - Segment
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

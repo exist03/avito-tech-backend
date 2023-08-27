@@ -5,9 +5,9 @@ import (
 	"avito-tech-backend/internal"
 	"context"
 	"encoding/json"
-	"time"
 )
 
+//go:generate mockery --name Repository
 type Repository interface {
 	Get(ctx context.Context, userId int) ([]internal.Segment, error)
 	Create(ctx context.Context, segment internal.Segment) error
@@ -29,7 +29,7 @@ func (s *Service) Get(userId int) ([]byte, error) {
 		return nil, err
 	}
 	response, _ := json.Marshal(list)
-	return response, err
+	return response, nil
 }
 
 func (s *Service) GetHistory(timeBegin, timeEnd int64, userId int) (string, error) {
@@ -44,9 +44,6 @@ func (s *Service) GetHistory(timeBegin, timeEnd int64, userId int) (string, erro
 }
 
 func (s *Service) Create(segment internal.Segment) error {
-	if segment.TTL.Before(time.Now()) {
-		return domain.ErrInvalidArgument
-	}
 	err := s.repo.Create(context.Background(), segment)
 	if err != nil {
 		return err

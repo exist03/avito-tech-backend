@@ -37,19 +37,29 @@ func New(service Service) *Handlers {
 	return &Handlers{service: service}
 }
 
-//func (hl *HandlersLogger) GetL(c *fiber.Ctx) error {
-//	hl.l.Info().Msg("sending request")
-//	resp, err := hl.h.Get(c)
-//	if err != nil {
-//		hl.l.Warn().Msg("zalupa")
-//		return err
+//	func (hl *HandlersLogger) GetL(c *fiber.Ctx) error {
+//		hl.l.Info().Msg("sending request")
+//		resp, err := hl.h.Get(c)
+//		if err != nil {
+//			hl.l.Warn().Msg("zalupa")
+//			return err
+//		}
+//		hl.l.Info().Msg(string(resp))
+//		c.Send(resp)
+//		return nil
 //	}
-//	hl.l.Info().Msg(string(resp))
-//	c.Send(resp)
-//	return nil
-//}
-
-// TODO add NotFound
+//
+// TODO fix NoContent/PgxNoRows
+// @Description Get list of user`s segments.
+// @Summary Get list
+// @Tags Segment
+// @Produce json
+// @Param user_id path int true "Segment ID"
+// @Success 200 "OK"
+// @Success 204 "No content"
+// @Failure 400 "Bad request"
+// @Failure 404 "Not found"
+// @Router /api/service/user/get/{user_id} [get]
 func (h *Handlers) Get(c *fiber.Ctx) error {
 	userId, err := strconv.Atoi(c.Params("user_id"))
 	if err != nil {
@@ -59,6 +69,8 @@ func (h *Handlers) Get(c *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, domain.ErrNoContent) {
 			return c.SendStatus(http.StatusNoContent)
+		} else if errors.Is(err, domain.ErrNotFound) {
+			return c.SendStatus(http.StatusNotFound)
 		}
 	}
 
@@ -92,8 +104,19 @@ func (h *Handlers) GetHistory(c *fiber.Ctx) error {
 	return c.SendFile(response)
 }
 
+// @Description Create a new segment.
+// @Summary create a new segment
+// @Tags Segment
+// @Accept json
+// @Produce json
+// @Param User-role header string true "admin"
+// @Param segment_attrs body internal.Segment true "Segment attributes"
+// @Success 200 "OK"
+// @Failure 403 "Forbidden"
+// @Failure 400 "Bad request"
+// @Router /api/service/segment [post]
 func (h *Handlers) Create(c *fiber.Ctx) error {
-	var segment internal.Segment
+	segment := internal.Segment{}
 	err := c.BodyParser(&segment)
 	if err != nil {
 		return c.SendStatus(http.StatusBadRequest)
@@ -124,6 +147,17 @@ func (h *Handlers) Update(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusOK)
 }
 
+// @Description Delete a segment.
+// @Summary delete a new segment
+// @Tags Segment
+// @Accept json
+// @Produce json
+// @Param id path int true "Segment ID"
+// @Param User-role header string true "admin"
+// @Success 200 "OK"
+// @Failure 404 "Not found"
+// @Failure 400 "Bad request"
+// @Router /api/service/segment/{id} [delete]
 func (h *Handlers) Delete(c *fiber.Ctx) error {
 	segmentId, err := strconv.Atoi(c.Params("id"))
 	if err != nil {

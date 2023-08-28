@@ -48,11 +48,11 @@ func New(service Service) *Handlers {
 //		c.Send(resp)
 //		return nil
 //	}
-//
+
 // TODO fix NoContent/PgxNoRows
 // @Description Get list of user`s segments.
 // @Summary Get list
-// @Tags Segment
+// @Tags User
 // @Produce json
 // @Param user_id path int true "Segment ID"
 // @Success 200 "OK"
@@ -77,6 +77,18 @@ func (h *Handlers) Get(c *fiber.Ctx) error {
 	return c.Send(response)
 }
 
+// @Description Get file with history of user`s segments
+// @Summary get file with history
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param user_id query int true "Segment ID"
+// @Param start query int true "Time start"
+// @Param end query int true "Time end"
+// @Success 200 "OK"
+// @Failure 400 "Bad request"
+// @Failure 500 "Internal server error"
+// @Router /api/service/user/get_history [get]
 func (h *Handlers) GetHistory(c *fiber.Ctx) error {
 	userId, err := strconv.Atoi(c.Query("user_id"))
 	if err != nil {
@@ -109,8 +121,8 @@ func (h *Handlers) GetHistory(c *fiber.Ctx) error {
 // @Tags Segment
 // @Accept json
 // @Produce json
-// @Param User-role header string true "admin"
-// @Param segment_attrs body internal.Segment true "Segment attributes"
+// @Param User-role header string false "admin"
+// @Param segment_attrs body internal.Segment false "Segment attributes"
 // @Success 200 "OK"
 // @Failure 403 "Forbidden"
 // @Failure 400 "Bad request"
@@ -131,6 +143,18 @@ func (h *Handlers) Create(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusOK)
 }
 
+// @Description Update user`s segments.
+// @Summary update user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param segment_attrs body internal.UpdateRequest false "Update attributes"
+// @Success 200 "OK"
+// @Failure 400 "Bad request"
+// @Failure 403 "Forbidden"
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /api/service/user/update [patch]
 func (h *Handlers) Update(c *fiber.Ctx) error {
 	var req internal.UpdateRequest
 	err := c.BodyParser(&req)
@@ -153,7 +177,7 @@ func (h *Handlers) Update(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id path int true "Segment ID"
-// @Param User-role header string true "admin"
+// @Param User-role header string false "admin"
 // @Success 200 "OK"
 // @Failure 404 "Not found"
 // @Failure 400 "Bad request"

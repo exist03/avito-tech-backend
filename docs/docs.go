@@ -39,14 +39,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "admin",
                         "name": "User-role",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "description": "Segment attributes",
                         "name": "segment_attrs",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/internal.Segment"
                         }
@@ -90,8 +88,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "admin",
                         "name": "User-role",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -114,7 +111,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Segment"
+                    "User"
                 ],
                 "summary": "Get list",
                 "parameters": [
@@ -141,6 +138,97 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/service/user/get_history": {
+            "get": {
+                "description": "Get file with history of user` + "`" + `s segments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "get file with history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Segment ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Time start",
+                        "name": "start",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Time end",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/api/service/user/update": {
+            "patch": {
+                "description": "Update user` + "`" + `s segments.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "update user",
+                "parameters": [
+                    {
+                        "description": "Update attributes",
+                        "name": "segment_attrs",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/internal.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -152,6 +240,34 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "internal.UpdateRequest": {
+            "type": "object",
+            "properties": {
+                "segments_add": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal.UserSegment"
+                    }
+                },
+                "segments_del": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal.UserSegment"
+                    }
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal.UserSegment": {
+            "type": "object",
+            "properties": {
+                "segment": {
+                    "$ref": "#/definitions/internal.Segment"
                 },
                 "ttl": {
                     "type": "string"

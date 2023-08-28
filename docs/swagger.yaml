@@ -5,6 +5,24 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  internal.UpdateRequest:
+    properties:
+      segments_add:
+        items:
+          $ref: '#/definitions/internal.UserSegment'
+        type: array
+      segments_del:
+        items:
+          $ref: '#/definitions/internal.UserSegment'
+        type: array
+      user_id:
+        type: integer
+    type: object
+  internal.UserSegment:
+    properties:
+      segment:
+        $ref: '#/definitions/internal.Segment'
       ttl:
         type: string
     type: object
@@ -27,12 +45,10 @@ paths:
       - description: admin
         in: header
         name: User-role
-        required: true
         type: string
       - description: Segment attributes
         in: body
         name: segment_attrs
-        required: true
         schema:
           $ref: '#/definitions/internal.Segment'
       produces:
@@ -61,7 +77,6 @@ paths:
       - description: admin
         in: header
         name: User-role
-        required: true
         type: string
       produces:
       - application/json
@@ -97,7 +112,67 @@ paths:
           description: Not found
       summary: Get list
       tags:
-      - Segment
+      - User
+  /api/service/user/get_history:
+    get:
+      consumes:
+      - application/json
+      description: Get file with history of user`s segments
+      parameters:
+      - description: Segment ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Time start
+        in: query
+        name: start
+        required: true
+        type: integer
+      - description: Time end
+        in: query
+        name: end
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      summary: get file with history
+      tags:
+      - User
+  /api/service/user/update:
+    patch:
+      consumes:
+      - application/json
+      description: Update user`s segments.
+      parameters:
+      - description: Update attributes
+        in: body
+        name: segment_attrs
+        schema:
+          $ref: '#/definitions/internal.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+      summary: update user
+      tags:
+      - User
 securityDefinitions:
   ApiKeyAuth:
     in: header

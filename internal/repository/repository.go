@@ -67,6 +67,7 @@ func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]internal.Segment, err
 func (r *PsqlRepo) GetHistory(ctx context.Context, timeBegin, timeEnd int64, userId int) (string, error) {
 	err := r.checkUser(ctx, userId)
 	if err != nil {
+		log.Println(err, "here")
 		return "", err
 	}
 	rows, err := r.pool.Query(ctx, "SELECT segment_id, type, time FROM history where time BETWEEN $1 AND $2 AND user_id=$3", timeBegin, timeEnd, userId)
@@ -97,7 +98,7 @@ func (r *PsqlRepo) GetHistory(ctx context.Context, timeBegin, timeEnd int64, use
 	if err = rows.Err(); err != nil {
 		return "", err
 	}
-	return filename, nil // remove hardcode
+	return filename, nil
 }
 
 func (r *PsqlRepo) Create(ctx context.Context, segment internal.Segment) error {

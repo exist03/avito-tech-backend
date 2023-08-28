@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   app:
-    image: myServ
+    image: myserv
     build:
       dockerfile: Dockerfile
       context: .
@@ -9,12 +9,14 @@ services:
       - postgres
     ports:
       - "8080:8080"
-    profiles:
-      - db
+    environment:
+      POSTGRES_HOST: "postgres"
   postgres:
     image: postgres
     container_name: postgres
-    profiles:
-      - db
+    environment:
+      POSTGRES_HOST: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql

@@ -1,9 +1,6 @@
-CREATE
-DATABASE avito;
-GRANT ALL PRIVILEGES ON DATABASE
-avito TO postgres;
-\c
-avito
+CREATE DATABASE avito;
+GRANT ALL PRIVILEGES ON DATABASE avito TO postgres;
+\c avito
 DROP TABLE IF EXISTS accordance;
 DROP TABLE IF EXISTS segment;
 DROP TABLE IF EXISTS users;

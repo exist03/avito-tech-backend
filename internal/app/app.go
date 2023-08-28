@@ -25,7 +25,7 @@ const (
 type App struct {
 	handlers   *handlers.Handlers
 	service    *service.Service
-	repository *repository.PsqlRepo // mb inject interface
+	repository *repository.PsqlRepo
 	router     *fiber.App
 }
 

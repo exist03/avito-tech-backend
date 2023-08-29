@@ -107,7 +107,30 @@ func (r *PsqlRepo) Create(ctx context.Context, segment internal.Segment) error {
 		r.logger.Debug().Err(err).Msg("create error")
 		return err
 	}
+	id, err := r.getPercentUsers(ctx, segment.Percent)
+	for i := 0; i < len(id); i++ {
+		r.connectSegment(ctx, id[i], segment.Id, segment.TTL)
+	}
 	return nil
+}
+func (r *PsqlRepo) getPercentUsers(ctx context.Context, percent float64) ([]int, error) {
+	res := make([]int, 0)
+	rows, err := r.pool.Query(ctx, "SELECT id FROM users ORDER BY random() LIMIT (SELECT count(*)*$1/100 FROM users)", percent)
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		res = append(res, id)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (r *PsqlRepo) Update(ctx context.Context, req internal.UpdateRequest) error {

@@ -5,6 +5,7 @@ import (
 	"avito-tech-backend/internal"
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -139,6 +140,7 @@ func (h *Handlers) Create(c *fiber.Ctx) error {
 			return c.SendStatus(http.StatusBadRequest)
 		}
 		return c.SendStatus(http.StatusInternalServerError)
+		log.Println(err)
 	}
 	return c.SendStatus(http.StatusOK)
 }

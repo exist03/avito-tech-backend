@@ -7,15 +7,17 @@ type User struct {
 	Name string `json:"name,omitempty"`
 }
 type Segment struct {
-	Id   int    `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-type UserSegment struct {
-	Segment `json:"segment"`
+	Id      int       `json:"id,omitempty"`
+	Name    string    `json:"name,omitempty"`
+	Percent float64   `json:"percent"`
 	TTL     time.Time `json:"ttl,omitempty"`
 }
+
+//	type UserSegment struct {
+//		Segment `json:"segment"`
+//	}
 type UpdateRequest struct {
-	UserId      int           `json:"user_id,omitempty"`
-	SegmentsAdd []UserSegment `json:"segments_add,omitempty"`
-	SegmentsDel []UserSegment `json:"segments_del,omitempty"`
+	UserId      int       `json:"user_id,omitempty"`
+	SegmentsAdd []Segment `json:"segments_add,omitempty"`
+	SegmentsDel []Segment `json:"segments_del,omitempty"`
 }

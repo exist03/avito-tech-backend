@@ -240,6 +240,12 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "percent": {
+                    "type": "number"
+                },
+                "ttl": {
+                    "type": "string"
                 }
             }
         },
@@ -249,28 +255,17 @@ const docTemplate = `{
                 "segments_add": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.UserSegment"
+                        "$ref": "#/definitions/internal.Segment"
                     }
                 },
                 "segments_del": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.UserSegment"
+                        "$ref": "#/definitions/internal.Segment"
                     }
                 },
                 "user_id": {
                     "type": "integer"
-                }
-            }
-        },
-        "internal.UserSegment": {
-            "type": "object",
-            "properties": {
-                "segment": {
-                    "$ref": "#/definitions/internal.Segment"
-                },
-                "ttl": {
-                    "type": "string"
                 }
             }
         }

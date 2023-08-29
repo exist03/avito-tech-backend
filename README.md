@@ -10,7 +10,9 @@
 https://github.com/exist03/avito-tech-backend.git
 cd avito-tech-backend
 #Запуск сервиса
-make docker 
+make docker
+#Swagger документация
+localhost:8080/swagger/index.html
 #Запуск тестов
 make tests
 ```
@@ -49,7 +51,7 @@ curl -X GET localhost:8080/api/service/user/get/1
 #GET
 curl -X GET 'localhost:8080/api/service/user/get_history?user_id=1&start=1693063271&end=1693209561'
 #POST
-curl -X POST localhost:8080/api/service/segment -H "User-role: admin" -H "Content-Type: application/json" -d '{"id":20, "name":"somename"}'
+curl -X POST localhost:8080/api/service/segment -H "User-role: admin" -H "Content-Type: application/json" -d '{"id":20, "name":"somename", "percent": 35, "ttl": "2024-03-12T13:37:27+00:00"}'
 #PATCH
 curl -X PATCH localhost:8080/api/service/user/update -H "Content-Type: application/json" -d '{"user_id":1, "segments_add":[{"id":1,"name":"somename","ttl":"2024-03-12T13:37:27+00:00"}]}'
 #DELETE

@@ -5,26 +5,23 @@ definitions:
         type: integer
       name:
         type: string
+      percent:
+        type: number
+      ttl:
+        type: string
     type: object
   internal.UpdateRequest:
     properties:
       segments_add:
         items:
-          $ref: '#/definitions/internal.UserSegment'
+          $ref: '#/definitions/internal.Segment'
         type: array
       segments_del:
         items:
-          $ref: '#/definitions/internal.UserSegment'
+          $ref: '#/definitions/internal.Segment'
         type: array
       user_id:
         type: integer
-    type: object
-  internal.UserSegment:
-    properties:
-      segment:
-        $ref: '#/definitions/internal.Segment'
-      ttl:
-        type: string
     type: object
 info:
   contact: {}

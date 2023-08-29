@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 )
 
-//go:generate mockery --name Repository
+//go:generate mockery --name Repository --with-expecter=true
 type Repository interface {
 	Get(ctx context.Context, userId int) ([]internal.Segment, error)
 	Create(ctx context.Context, segment internal.Segment) error

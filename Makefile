@@ -1,4 +1,4 @@
 docker:
-	docker compose up
+	docker compose up --build
 test:
 	go test -cover -v ./internal/service

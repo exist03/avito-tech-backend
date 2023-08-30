@@ -37,13 +37,6 @@ func New(ctx context.Context, cfg *config.Config) *App {
 	a.router = fiber.New()
 	a.router.Use(logger.New())
 	a.router.Get("/swagger/*", swagger.HandlerDefault)
-	//hl := handlers.NewHL(a.handlers, logger.GetLogger())
-	//a.router.Use(logger.New())
-
-	//a.router.Get("/", a.GetUserIDLogger)
-
-	//a.router.Get("/api/service/get/:user_id", hl.GetL)
-
 	a.router.Get("/api/service/user/get/:user_id", a.handlers.Get)
 	a.router.Get("/api/service/user/get_history/", a.handlers.GetHistory)
 	a.router.Post("/api/service/segment/", middleware.RoleCheck(a.handlers.Create))

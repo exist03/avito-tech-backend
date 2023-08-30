@@ -22,33 +22,9 @@ type Handlers struct {
 	service Service
 }
 
-//type HandlersLogger struct {
-//	h *Handlers
-//	l zerolog.Logger
-//}
-//
-//func NewHL(handlers *Handlers, logger zerolog.Logger) *HandlersLogger {
-//	return &HandlersLogger{
-//		h: handlers,
-//		l: logger,
-//	}
-//}
-
 func New(service Service) *Handlers {
 	return &Handlers{service: service}
 }
-
-//	func (hl *HandlersLogger) GetL(c *fiber.Ctx) error {
-//		hl.l.Info().Msg("sending request")
-//		resp, err := hl.h.Get(c)
-//		if err != nil {
-//			hl.l.Warn().Msg("zalupa")
-//			return err
-//		}
-//		hl.l.Info().Msg(string(resp))
-//		c.Send(resp)
-//		return nil
-//	}
 
 // TODO fix NoContent/PgxNoRows
 // @Description Get list of user`s segments.

@@ -21,7 +21,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/service/segment": {
+        "/api/segment": {
             "post": {
                 "description": "Create a new segment.",
                 "consumes": [
@@ -46,7 +46,7 @@ const docTemplate = `{
                         "name": "segment_attrs",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/internal.Segment"
+                            "$ref": "#/definitions/domain.Segment"
                         }
                     }
                 ],
@@ -63,7 +63,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/service/segment/{id}": {
+        "/api/segment/{id}": {
             "delete": {
                 "description": "Delete a segment.",
                 "consumes": [
@@ -104,7 +104,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/service/user/get/{user_id}": {
+        "/api/user/get/{user_id}": {
             "get": {
                 "description": "Get list of user` + "`" + `s segments.",
                 "produces": [
@@ -139,7 +139,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/service/user/get_history": {
+        "/api/user/get_history": {
             "get": {
                 "description": "Get file with history of user` + "`" + `s segments",
                 "consumes": [
@@ -188,7 +188,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/service/user/update": {
+        "/api/user/update": {
             "patch": {
                 "description": "Update user` + "`" + `s segments.",
                 "consumes": [
@@ -207,7 +207,7 @@ const docTemplate = `{
                         "name": "segment_attrs",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/internal.UpdateRequest"
+                            "$ref": "#/definitions/domain.UpdateRequest"
                         }
                     }
                 ],
@@ -232,7 +232,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal.Segment": {
+        "domain.Segment": {
             "type": "object",
             "properties": {
                 "id": {
@@ -249,19 +249,19 @@ const docTemplate = `{
                 }
             }
         },
-        "internal.UpdateRequest": {
+        "domain.UpdateRequest": {
             "type": "object",
             "properties": {
                 "segments_add": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.Segment"
+                        "$ref": "#/definitions/domain.Segment"
                     }
                 },
                 "segments_del": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.Segment"
+                        "$ref": "#/definitions/domain.Segment"
                     }
                 },
                 "user_id": {

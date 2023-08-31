@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	internal "avito-tech-backend/internal"
+	internal "avito-tech-backend/domain"
 	context "context"
 
 	mock "github.com/stretchr/testify/mock"

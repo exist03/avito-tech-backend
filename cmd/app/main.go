@@ -21,5 +21,5 @@ func main() {
 	ctx := context.Background()
 	cfg := config.GetConfigYml()
 	a := app.New(ctx, cfg)
-	app.Run(a)
+	app.Run(a, cfg)
 }

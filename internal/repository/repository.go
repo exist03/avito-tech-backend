@@ -3,7 +3,6 @@ package repository
 import (
 	"avito-tech-backend/config"
 	"avito-tech-backend/domain"
-	"avito-tech-backend/internal"
 	"avito-tech-backend/pkg/logger"
 	"avito-tech-backend/pkg/postgresql"
 	"context"
@@ -12,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
-	"log"
 	"os"
 	"time"
 )
@@ -33,21 +31,21 @@ func NewPsql(ctx context.Context, config config.PsqlStorage) *PsqlRepo {
 	return &PsqlRepo{pool: pool, logger: log}
 }
 
-func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]internal.Segment, error) {
+func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]domain.Segment, error) {
 	err := r.checkUser(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
-	res := make([]internal.Segment, 0)
 	rows, err := r.pool.Query(ctx, "SELECT segment.id, segment.name from segment join accordance on segment.id = accordance.segment_id where accordance.user_id=$1", userId)
 	defer rows.Close()
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Println("qwe")
 			return nil, domain.ErrNoContent
 		}
 		return nil, err
 	}
+
+	var res []domain.Segment
 	for rows.Next() {
 		var segmentId int
 		var segmentName string
@@ -55,7 +53,7 @@ func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]internal.Segment, err
 		if err != nil {
 			return nil, err
 		}
-		segment := internal.Segment{Id: segmentId, Name: segmentName}
+		segment := domain.Segment{Id: segmentId, Name: segmentName}
 		res = append(res, segment)
 	}
 	if err = rows.Err(); err != nil {
@@ -67,7 +65,6 @@ func (r *PsqlRepo) Get(ctx context.Context, userId int) ([]internal.Segment, err
 func (r *PsqlRepo) GetHistory(ctx context.Context, timeBegin, timeEnd int64, userId int) (string, error) {
 	err := r.checkUser(ctx, userId)
 	if err != nil {
-		log.Println(err, "here")
 		return "", err
 	}
 	rows, err := r.pool.Query(ctx, "SELECT segment_id, type, time FROM history where time BETWEEN $1 AND $2 AND user_id=$3", timeBegin, timeEnd, userId)
@@ -101,20 +98,23 @@ func (r *PsqlRepo) GetHistory(ctx context.Context, timeBegin, timeEnd int64, use
 	return filename, nil
 }
 
-func (r *PsqlRepo) Create(ctx context.Context, segment internal.Segment) error {
+func (r *PsqlRepo) Create(ctx context.Context, segment domain.Segment) error {
 	_, err := r.pool.Exec(ctx, "INSERT INTO segment VALUES ($1, $2)", segment.Id, segment.Name)
 	if err != nil {
 		r.logger.Debug().Err(err).Msg("create error")
 		return err
 	}
 	id, err := r.getPercentUsers(ctx, segment.Percent)
+	if err != nil {
+		return err
+	}
 	for i := 0; i < len(id); i++ {
 		r.connectSegment(ctx, id[i], segment.Id, segment.TTL)
 	}
 	return nil
 }
 func (r *PsqlRepo) getPercentUsers(ctx context.Context, percent float64) ([]int, error) {
-	res := make([]int, 0)
+	var res []int
 	rows, err := r.pool.Query(ctx, "SELECT id FROM users ORDER BY random() LIMIT (SELECT count(*)*$1/100 FROM users)", percent)
 	defer rows.Close()
 	if err != nil {
@@ -133,7 +133,7 @@ func (r *PsqlRepo) getPercentUsers(ctx context.Context, percent float64) ([]int,
 	return res, nil
 }
 
-func (r *PsqlRepo) Update(ctx context.Context, req internal.UpdateRequest) error {
+func (r *PsqlRepo) Update(ctx context.Context, req domain.UpdateRequest) error {
 	err := r.checkUser(ctx, req.UserId)
 	if err != nil {
 		return err
@@ -150,6 +150,7 @@ func (r *PsqlRepo) connectSegment(ctx context.Context, userId, segmentId int, tt
 	_, err := r.pool.Exec(ctx, "INSERT INTO accordance VALUES ($1, $2, $3)", userId, segmentId, ttl.Unix())
 	if err != nil {
 		r.logger.Info().Err(err).Msg("connect error")
+		return
 	}
 	r.pool.Exec(ctx, "INSERT INTO history VALUES ($1, $2, $3, $4)", userId, segmentId, true, time.Now().Unix())
 }
@@ -157,6 +158,7 @@ func (r *PsqlRepo) disconnectSegment(ctx context.Context, userId, segmentId int)
 	_, err := r.pool.Exec(ctx, "DELETE FROM accordance WHERE user_id=$1 AND segment_id=$2", userId, segmentId)
 	if err != nil {
 		r.logger.Info().Err(err).Msg("disconnect error")
+		return
 	}
 	r.pool.Exec(ctx, "INSERT INTO history VALUES ($1, $2, $3, $4)", userId, segmentId, false, time.Now().Unix())
 }
@@ -184,21 +186,29 @@ func (r *PsqlRepo) checkUser(ctx context.Context, userId int) error {
 	return nil
 }
 
-func (r *PsqlRepo) Checker() {
+func (r *PsqlRepo) Checker(ctx context.Context) {
 	for {
-		time.Sleep(45 * time.Second)
-		rows, err := r.pool.Query(context.Background(), "SELECT user_id, segment_id FROM accordance WHERE expires<$1", time.Now().Unix())
-		if err != nil {
-			continue
-		}
-		for rows.Next() {
-			var (
-				userId    int
-				segmentId int
-			)
-			rows.Scan(&userId, &segmentId)
-			r.pool.Exec(context.Background(), "INSERT INTO history VALUES ($1, $2, $3, $4)", userId, segmentId, false, time.Now().Unix())
-			r.pool.Exec(context.Background(), "DELETE FROM accordance WHERE user_id=$1 AND segment_id=$2", userId, segmentId)
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			time.Sleep(45 * time.Second)
+			rows, err := r.pool.Query(context.Background(), "SELECT user_id, segment_id FROM accordance WHERE expires<$1", time.Now().Unix())
+			if err != nil {
+				continue
+			}
+			for rows.Next() {
+				var (
+					userId    int
+					segmentId int
+				)
+				if err = rows.Scan(&userId, &segmentId); err != nil {
+					continue
+				}
+				r.pool.Exec(context.Background(), "INSERT INTO history VALUES ($1, $2, $3, $4)", userId, segmentId, false, time.Now().Unix())
+				r.pool.Exec(context.Background(), "DELETE FROM accordance WHERE user_id=$1 AND segment_id=$2", userId, segmentId)
+			}
+			rows.Close()
 		}
 	}
 }

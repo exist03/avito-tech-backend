@@ -3,7 +3,6 @@ package config
 import (
 	"avito-tech-backend/pkg/logger"
 	"github.com/ilyakaznacheev/cleanenv"
-	"sync"
 )
 
 type Config struct {
@@ -24,19 +23,14 @@ type PsqlStorage struct {
 	Database string `yaml:"database" env:"POSTGRES_DB" env-default:"url"`
 }
 
-var instance *Config
-var once sync.Once
-
 func GetConfigYml() *Config {
-	once.Do(func() {
-		log := logger.GetLogger()
-		log.Info().Msg("read application config")
-		instance = &Config{}
-		if err := cleanenv.ReadConfig("config.yml", instance); err != nil {
-			help, _ := cleanenv.GetDescription(instance, nil)
-			log.Info().Msg(help)
-			log.Err(err)
-		}
-	})
+	log := logger.GetLogger()
+	log.Info().Msg("read application config")
+	instance := &Config{}
+	if err := cleanenv.ReadConfig("config.yml", instance); err != nil {
+		help, _ := cleanenv.GetDescription(instance, nil)
+		log.Info().Msg(help)
+		log.Err(err)
+	}
 	return instance
 }

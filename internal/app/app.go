@@ -18,10 +18,6 @@ import (
 	"time"
 )
 
-const (
-	httpPort = ":8080"
-)
-
 type App struct {
 	handlers   *handlers.Handlers
 	service    *service.Service
@@ -37,17 +33,21 @@ func New(ctx context.Context, cfg *config.Config) *App {
 	a.router = fiber.New()
 	a.router.Use(logger.New())
 	a.router.Get("/swagger/*", swagger.HandlerDefault)
-	a.router.Get("/api/service/user/get/:user_id", a.handlers.Get)
-	a.router.Get("/api/service/user/get_history/", a.handlers.GetHistory)
-	a.router.Post("/api/service/segment/", middleware.RoleCheck(a.handlers.Create))
-	a.router.Patch("/api/service/user/update/", a.handlers.Update)
-	a.router.Delete("/api/service/segment/:id", middleware.RoleCheck(a.handlers.Delete))
+	api := a.router.Group("/api")
+
+	user := api.Group("/user")
+	user.Get("/get/:user_id", a.handlers.Get)
+	user.Get("/get_history/", a.handlers.GetHistory)
+	user.Patch("/update/", a.handlers.Update)
+
+	api.Post("/segment/", middleware.RoleCheck(a.handlers.Create))
+	api.Delete("/segment/:id", middleware.RoleCheck(a.handlers.Delete))
 	return a
 }
 
-func Run(a *App) {
+func Run(a *App, cfg *config.Config) {
 	//auto disconnect segments
-	go a.repository.Checker()
+	go a.repository.Checker(context.Background())
 	//Graceful	Shutdown
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -59,7 +59,7 @@ func Run(a *App) {
 		}
 	}()
 
-	err := a.router.Listen(httpPort)
+	err := a.router.Listen(cfg.Listen.Port)
 	if err != nil {
 		log.Fatalln(err)
 	}

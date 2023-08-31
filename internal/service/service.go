@@ -2,17 +2,15 @@ package service
 
 import (
 	"avito-tech-backend/domain"
-	"avito-tech-backend/internal"
 	"context"
-	"encoding/json"
 )
 
 //go:generate mockery --name Repository --with-expecter=true
 type Repository interface {
-	Get(ctx context.Context, userId int) ([]internal.Segment, error)
-	Create(ctx context.Context, segment internal.Segment) error
+	Get(ctx context.Context, userId int) ([]domain.Segment, error)
+	Create(ctx context.Context, segment domain.Segment) error
 	Delete(ctx context.Context, segmentId int) error
-	Update(ctx context.Context, req internal.UpdateRequest) error
+	Update(ctx context.Context, req domain.UpdateRequest) error
 	GetHistory(ctx context.Context, timeBegin, timeEnd int64, userId int) (string, error)
 }
 type Service struct {
@@ -23,13 +21,12 @@ func New(repository Repository) *Service {
 	return &Service{repo: repository}
 }
 
-func (s *Service) Get(userId int) ([]byte, error) {
+func (s *Service) Get(userId int) ([]domain.Segment, error) {
 	list, err := s.repo.Get(context.Background(), userId)
 	if err != nil {
 		return nil, err
 	}
-	response, _ := json.Marshal(list)
-	return response, nil
+	return list, nil
 }
 
 func (s *Service) GetHistory(timeBegin, timeEnd int64, userId int) (string, error) {
@@ -43,26 +40,14 @@ func (s *Service) GetHistory(timeBegin, timeEnd int64, userId int) (string, erro
 	return path, nil
 }
 
-func (s *Service) Create(segment internal.Segment) error {
-	err := s.repo.Create(context.Background(), segment)
-	if err != nil {
-		return err
-	}
-	return nil
+func (s *Service) Create(segment domain.Segment) error {
+	return s.repo.Create(context.Background(), segment)
 }
 
-func (s *Service) Update(req internal.UpdateRequest) error {
-	err := s.repo.Update(context.Background(), req)
-	if err != nil {
-		return err
-	}
-	return nil
+func (s *Service) Update(req domain.UpdateRequest) error {
+	return s.repo.Update(context.Background(), req)
 }
 
 func (s *Service) Delete(segmentId int) error {
-	err := s.repo.Delete(context.Background(), segmentId)
-	if err != nil {
-		return err
-	}
-	return nil
+	return s.repo.Delete(context.Background(), segmentId)
 }

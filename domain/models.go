@@ -1,4 +1,4 @@
-package internal
+package domain
 
 import "time"
 
@@ -12,10 +12,6 @@ type Segment struct {
 	Percent float64   `json:"percent"`
 	TTL     time.Time `json:"ttl,omitempty"`
 }
-
-//	type UserSegment struct {
-//		Segment `json:"segment"`
-//	}
 type UpdateRequest struct {
 	UserId      int       `json:"user_id,omitempty"`
 	SegmentsAdd []Segment `json:"segments_add,omitempty"`

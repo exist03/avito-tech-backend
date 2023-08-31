@@ -12,8 +12,13 @@ import (
 
 func NewClient(ctx context.Context, config config.PsqlStorage, maxAttempts int) (pool *pgxpool.Pool, err error) {
 	log := logger.GetLogger()
-	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", config.Username, config.Password, config.Host, config.Port, config.Database)
-	log.Info().Msg(dsn)
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
+		config.Username,
+		config.Password,
+		config.Host,
+		config.Port,
+		config.Database)
+
 	err = utils.DoWithTries(func() error {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()

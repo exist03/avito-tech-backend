@@ -6,8 +6,8 @@ listen:
   bind_ip: 0.0.0.0
   port: :8080
 psqlStorage:
-  host: localhost
-#  host: postgres
+#  host: localhost
+  host: postgres
   port: 5432
   database: avito
   username: postgres
